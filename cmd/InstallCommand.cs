@@ -9,9 +9,9 @@
     using etc;
     using Internal;
 
-    public class InstallCommand : WithProject
+    public class InstallCommand : RuneCommand<InstallCommand>, IWithProject
     {
-        public static async Task<int> Run(string[] args)
+        internal override CommandLineApplication Setup()
         {
             var app = new CommandLineApplication
             {
@@ -28,21 +28,16 @@
             var restore = new RestoreCommand();
             app.OnExecute(async () =>
             {
+                if (string.IsNullOrEmpty(package.Value))
+                    return await Fail("Argument <package> is null.");
+
                 var result = await cmd.Execute(package.Value, registry);
                 if (result != 0)
                     return result;
                 return await restore.Execute(registry);
             });
 
-            try
-            {
-                return await app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString().Color(Color.Red));
-                return 1;
-            }
+            return app;
         }
 
         public async Task<int> Execute(string package, CommandOption registryOption)
@@ -54,20 +49,20 @@
 
             var dir = Directory.GetCurrentDirectory();
 
-            if (!Validate(dir))
-                return 1;
+            if (!this.Validate(dir))
+                return await Fail();
 
             if (Indexer.FromLocal().UseLock().Exist(package))
             {
                 Console.WriteLine($"{":page_with_curl:".Emoji()} '{package}' is already {"found".Nier(0).Color(Color.Red)} in project.");
-                return 1;
+                return await Fail();
             }
 
 
             if(!await Registry.By(registry).Exist(package))
             {
                 Console.WriteLine($"{":page_with_curl:".Emoji()} '{package}' is {"not".Nier(0).Color(Color.Red)} found in '{registry}' registry.");
-                return 1;
+                return await Fail();
             }
 
             try
@@ -75,7 +70,7 @@
                 var (asm, bytes) = await Registry.By(registry).Fetch(package);
 
                 if (asm is null)
-                    return 1;
+                    return await Fail();
 
                 Indexer.FromLocal()
                     .UseLock()
@@ -86,9 +81,9 @@
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString().Color(Color.Red));
-                return 2;
+                return await Fail(2);
             }
-            return 0;
+            return await Success();
         }
     }
 }

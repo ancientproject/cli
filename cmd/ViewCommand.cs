@@ -7,10 +7,11 @@
     using ancient.runtime.tools;
     using cli;
     using etc;
+    using Internal;
 
-    public class ViewCommand
+    public class ViewCommand : RuneCommand<ViewCommand>
     {
-        public static async Task<int> Run(string[] args)
+        internal override CommandLineApplication Setup()
         {
             var app = new CommandLineApplication
             {
@@ -24,29 +25,24 @@
             var file = app.Argument("<file>", "file name");
             app.OnExecute(() => cmd.Execute(file.Value));
 
-            try
-            {
-                return await app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString().Color(Color.Red));
-                return 1;
-            }
+            return app;
         }
 
-        public int Execute(string file)
+        public Task<int> Execute(string file)
         {
+            if (file is null)
+                return Fail($"<file> argument is null");
+
             var info = new FileInfo(file);
 
             if (!info.Exists)
             {
                 Console.WriteLine($"{":page_with_curl:".Emoji()} '{info}' not {"found".Nier(0).Color(Color.Red)}.");
-                return 1;
+                return Fail();
             }
 
             Console.WriteLine(ByteArrayUtils.PrettyHexDump(File.ReadAllBytes(file)));
-            return 0;
+            return Success();
         }
     }
 }

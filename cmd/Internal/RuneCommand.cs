@@ -34,6 +34,7 @@
 
         protected static Task<int> Success() => Task.FromResult(0);
         protected static Task<int> Fail() => Task.FromResult(1);
+        protected static Task<int> Fail(int status) => Task.FromResult(status);
         protected static Task<int> Fail(string text)
         {
             Console.WriteLine($"{":x:".Emoji()} {text.Color(Color.Red)}");
