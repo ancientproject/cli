@@ -155,10 +155,16 @@
         }
         private static void PrintInfo()
         {
-            WriteLine($" OS Name:     {RuntimeEnvironment.OperatingSystem}");
-            WriteLine($" OS Version:  {RuntimeEnvironment.OperatingSystemVersion}");
-            WriteLine($" OS Platform: {RuntimeEnvironment.OperatingSystemPlatform}");
-            WriteLine($" Base Path:   {ApplicationEnvironment.ApplicationBasePath}");
+            var env = GetEnvironmentVariable("ANCIENT_HOME", EnvironmentVariableTarget.User) ?? "<NOT SET>";
+
+
+            WriteLine($" OS Name     : {RuntimeEnvironment.OperatingSystem}");
+            WriteLine($" OS Version  : {RuntimeEnvironment.OperatingSystemVersion}");
+            WriteLine($" OS Arch     : {RuntimeEnvironment.RuntimeArchitecture}");
+            WriteLine($" Base Path   : {ApplicationEnvironment.ApplicationBasePath}");
+            WriteLine($" Config Path : {Dirs.ConfigFile.FullName}");
+            WriteLine($" VM Path     : {env}");
+
         }
         private static bool IsArg(string candidate, string longName) 
             => IsArg(candidate, null, longName);
