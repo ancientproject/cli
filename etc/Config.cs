@@ -13,8 +13,6 @@
         public static T Get<T>(string section, string key, T @default)
         {
             var converter = TypeDescriptor.GetConverter(typeof(T));
-            if (converter.CanConvertFrom(typeof(string)))
-                throw new ContextMarshalException($"Cast 'string' to '{typeof(T).Name}' not supported.");
             var target = default(Section);
             if ((target = new Ini(Dirs.ConfigFile)[section]) is null)
                 return @default;
