@@ -10,9 +10,9 @@
     using etc;
     using Internal;
 
-    public class VMCommand : WithProject
+    public class VMCommand : RuneCommand<VMCommand>, IWithProject
     {
-        public static async Task<int> Run(string[] args)
+        internal override CommandLineApplication Setup()
         {
             var app = new CommandLineApplication
             {
@@ -28,36 +28,28 @@
             var fastWrite = app.Option("-f|--fast_write <bool>", "Use fast-write mode?", CommandOptionType.BoolValue);
             var keepMemory = app.Option("-k|--keep_memory <bool>", "Keep memory?", CommandOptionType.BoolValue);
             var isInteractive = app.Option("-i|--interactive", "Start with interactive mode", CommandOptionType.BoolValue);
-            app.OnExecute(() =>
+            app.OnExecute(async () =>
             {
                 if (isInteractive.BoolValue.HasValue)
-                    return vm.Execute(isDebug, keepMemory, fastWrite, isInteractive);
+                    return await vm.Execute(isDebug, keepMemory, fastWrite, isInteractive);
                 var buildResult = dotnetBuild.Execute(true);
-                return buildResult != 0 ? buildResult : vm.Execute(isDebug, keepMemory, fastWrite, isInteractive);
+                return buildResult != 0 ? buildResult : await vm.Execute(isDebug, keepMemory, fastWrite, isInteractive);
             });
-            try
-            {
-                return await app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString().Color(Color.Red));
-                return 1;
-            }
+            return app;
         }
 
-        internal int Execute(CommandOption isDebug, CommandOption keepMemory, CommandOption fastWrite, CommandOption isInteractive)
+        internal async Task<int> Execute(CommandOption isDebug, CommandOption keepMemory, CommandOption fastWrite, CommandOption isInteractive)
         {
             var dir = Directory.GetCurrentDirectory();
-            if (!Validate(dir))
-                return 1;
+            if (!this.Validate(dir))
+                return await Fail();
 
             var ancient_home = Environment.GetEnvironmentVariable("ANCIENT_HOME", EnvironmentVariableTarget.User);
 
             if (ancient_home is null)
-                throw new InvalidOperationException($"env variable 'ANCIENT_HOME' is not set.");
+                return await Fail($"Env variable 'ANCIENT_HOME' is not set.");
             if (!new DirectoryInfo(ancient_home).Exists)
-                throw new InvalidOperationException($"Env variable 'ANCIENT_HOME' is invalid.");
+                return await Fail($"Env variable 'ANCIENT_HOME' is invalid.");
 
             var vm_home = Path.Combine(ancient_home, "vm");
             var vm_bin = Path.Combine(vm_home, "vm.exe");
@@ -86,7 +78,8 @@
                 .WithEnv("CLI_WORK_PATH", dir)
 
                 .Start()
-                .Wait().ExitCode();
+                .Wait()
+                .ExitCode();
         }
     }
 }
