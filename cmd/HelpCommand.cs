@@ -1,7 +1,9 @@
 ﻿namespace rune.cmd
 {
+    using System.Diagnostics;
     using System.Drawing;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
     using etc;
@@ -61,8 +63,10 @@
             return builder.ToString();
         }
 
+        public static string GetVersion() 
+            => $"v{FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion}";
 
-        public static void PrintVersion() => WriteLine("v0.66-beta");
-        public static void PrintVersionHeader() => WriteLine($"Rune v0.66-beta x64 [{"Ancient SDK".Color(Color.Chocolate)}]");
+        public static void PrintVersion() => WriteLine(GetVersion());
+        public static void PrintVersionHeader() => WriteLine($"Rune {GetVersion()} x64 [{"Ancient SDK".Color(Color.Chocolate)}]");
     }
 }
