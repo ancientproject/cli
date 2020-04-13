@@ -61,6 +61,11 @@
         private static void GetConfig(CommandLineApplication app)
         {
             app.Description = $"[section:key] Get value by key from config";
+            app.HelpOption("-h|--help");
+
+            var key = app.Argument("key", "");
+
+            app.OnExecute(new GetCommand(key).Execute);
         }
 
         private class SetCommand
@@ -77,12 +82,12 @@
             public async Task<int> Execute()
             {
                 if (_key.IsEmpty())
-                    return Error($"key argument expects.");
+                    return await Fail($"key argument expects.");
                 if (_value.IsEmpty())
-                    return Error($"value argument expects.");
+                    return await Fail($"value argument expects.");
 
                 if (!Regex.IsMatch(_key.Value, @"\w+\:\w+"))
-                    return Error($"'{_key.Value}' is not valid format. [section:key](\\w+\\:\\w+)");
+                    return await Fail($"'{_key.Value}' is not valid format. [section:key](\\w+\\:\\w+)");
                 var section = _key.Value.Split(':').First();
                 var key = _key.Value.Split(':').Last();
 
@@ -90,16 +95,38 @@
 
                 Console.WriteLine($"{":heavy_check_mark:".Emoji()} {"Success".Nier().Color(Color.GreenYellow)} set '{_value.Value}' to '{section}:{key}'.");
 
-                return 0;
+                return await Success();
             }
         }
 
-
-        private static int Error(string text)
+        private class GetCommand
         {
-            Console.WriteLine(text.Color(Color.Red));
-            return 1;
-        }
+            private readonly CommandArgument _key;
 
+            public GetCommand(CommandArgument key) => this._key = key;
+
+            public async Task<int> Execute()
+            {
+                if (_key.IsEmpty())
+                    return await Fail($"key argument expects.");
+
+                if (!Regex.IsMatch(_key.Value, @"\w+\:\w+"))
+                    return await Fail($"'{_key.Value}' is not valid format. [section:key](\\w+\\:\\w+)");
+                var section = _key.Value.Split(':').First();
+                var key = _key.Value.Split(':').Last();
+
+                var result = Config.Get<string>(section, key, null);
+
+                if (result is null)
+                {
+                    Console.WriteLine($"{":x:".Emoji()} {"Fail".Nier().Color(Color.Red)} get value from '{section}:{key}'.");
+                    return await Fail();
+                }
+
+                Console.WriteLine($"{":heavy_check_mark:".Emoji()} '{section}:{key}' is '{result}'");
+
+                return await Success();
+            }
+        }
     }
 }
