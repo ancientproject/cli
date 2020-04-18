@@ -2,6 +2,7 @@
 {
     using System;
     using System.Drawing;
+    using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Text.RegularExpressions;
@@ -20,7 +21,7 @@
         public GitHubOrgRegistry(string url)
         {
             _url = url;
-            client = new GitHubClient(new ProductHeaderValue("0xF6"));
+            client = new GitHubClient(new ProductHeaderValue("rune-cli"));
         }
 
         public async Task<bool> Exist(string id)
@@ -73,5 +74,7 @@
             var raw = CSharpCompile.Build(id, await file.DownloadUrl.WithTimeout(10).GetStringAsync());
             return (Assembly.Load(raw), raw);
         }
+
+        public Task<bool> Publish(FileInfo pkg, RuneSpec spec) => throw new NotImplementedException();
     }
 }
