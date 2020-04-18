@@ -57,7 +57,7 @@
 
                     try
                     {
-                        var (asm, bytes) = await Registry.By(registry).Fetch(package);
+                        var (asm, bytes, spec) = await Registry.By(registry).Fetch(package);
 
                         if (asm is null)
                         {
@@ -67,7 +67,7 @@
 
                         Indexer.FromLocal()
                             .UseLock()
-                            .SaveDep(asm, bytes, registry);
+                            .SaveDep(asm, bytes, spec);
                         Console.WriteLine($"{":movie_camera:".Emoji()} '{package}' restore {"success".Nier(0).Color(Color.GreenYellow)}.");
                     }
                     catch (Exception e)

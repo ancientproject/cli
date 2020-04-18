@@ -32,7 +32,7 @@
             {
                 if (isInteractive.BoolValue.HasValue)
                     return await vm.Execute(isDebug, keepMemory, fastWrite, isInteractive);
-                var buildResult = dotnetBuild.Execute(true);
+                var buildResult = await dotnetBuild.Execute(true);
                 return buildResult != 0 ? buildResult : await vm.Execute(isDebug, keepMemory, fastWrite, isInteractive);
             });
             return app;
@@ -51,11 +51,16 @@
             if (!new DirectoryInfo(ancient_home).Exists)
                 return await Fail($"Env variable 'ANCIENT_HOME' is invalid.");
 
-            var vm_home = Path.Combine(ancient_home, "vm");
+            var vm_home = 
+                Environment.GetEnvironmentVariable("ANCIENT_VM_HOME", EnvironmentVariableTarget.User) ?? 
+                Path.Combine(ancient_home, "vm");
+
+
+
             var vm_bin = Path.Combine(vm_home, "vm.exe");
 
             if (!new DirectoryInfo(vm_home).Exists || !new FileInfo(vm_bin).Exists)
-                throw new InvalidOperationException($"Ancient VM is not installed.");
+                return await Fail($"Ancient VM is not installed.");
 
             var argBuilder = new List<string>();
 

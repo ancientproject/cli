@@ -34,30 +34,17 @@
 
             Console.Write($"{":thought_balloon:".Emoji()} FETCH '{Name}/{id}'...".Color(Color.DimGray));
 
-            var task = Endpoint
+            var req = await RuneTask.Fire(() => Endpoint
                 .WithTimeout(30)
                 .AllowAnyHttpStatus()
                 .AppendPathSegment($"/@/{id}")
-                .GetAsync();
-
-            new Task(() =>
-            {
-                while (!task.IsCompleted)
-                {
-                    Console.Write(".".Color(Color.Gray));
-                    Task.Delay(500).Wait();
-                }
-            }).Start();
-
-            var req = await task;
+                .GetAsync(), x => x.IsSuccessStatusCode);
 
             if (!req.IsSuccessStatusCode)
             {
-                Console.WriteLine($" {"FAIL".Color(Color.Red)}");
                 Console.WriteLine($"{":thought_balloon:".Emoji()} {"package".Nier()} '{Name}/{id}' failed fetch files.".Color(Color.Orange));
                 return default;
             }
-            Console.WriteLine(" OK".Color(Color.GreenYellow));
 
             var memory = new MemoryStream();
             await req.Content.CopyToAsync(memory);
@@ -65,23 +52,21 @@
             var result = await RunePackage.Unwrap(memory.ToArray());
 
 
-            Console.Write($"{":thought_balloon:".Emoji()} Extract '{id}-{result.Version}'...".Color(Color.DimGray));
 
             var packageFolder = Path.Combine(EnsureFolders(), $"{result.ID}/{result.Version}");
-
-            if (!Directory.Exists(packageFolder))
-                Directory.CreateDirectory(packageFolder);
-
             var targetFile = Path.Combine(packageFolder, "target.rpkg");
             var extractFolder = new DirectoryInfo(Path.Combine(packageFolder, "target"));
 
-            File.WriteAllBytes(targetFile, result.Content.ToArray());
+            if (!Directory.Exists(packageFolder))
+            {
+                Console.Write($"{":thought_balloon:".Emoji()} Extract '{id}-{result.Version}'...".Color(Color.DimGray));
+                Directory.CreateDirectory(packageFolder);
+                File.WriteAllBytes(targetFile, result.Content.ToArray());
+                ZipFile.ExtractToDirectory(targetFile, extractFolder.FullName);
+                Console.WriteLine($".. OK".Color(Color.DimGray));
+            }
 
-
-            ZipFile.ExtractToDirectory(targetFile, extractFolder.FullName);
-
-
-            Console.WriteLine($".. OK".Color(Color.DimGray));
+           
 
 
             if (result.Spec.Type == RuneSpec.PackageType.Binary)
@@ -93,7 +78,7 @@
             else
             {
                 var targetDll = extractFolder.EnumerateFiles("*.cs", SearchOption.AllDirectories).First();
-                var raw = CSharpCompile.Build(id, await File.ReadAllTextAsync(targetDll.FullName));
+                var raw = await CSharpCompile.BuildAsync(id, await File.ReadAllTextAsync(targetDll.FullName));
                 return (Assembly.Load(raw), raw, result.Spec);
             }
             
@@ -108,8 +93,8 @@
                 return false;
             }
             Console.Write($"{":thought_balloon:".Emoji()} Publish '{spec.ID}' with version '{spec.Version}' to registry...".Color(Color.Gray));
-
-            var task = Endpoint
+            
+            var result = await RuneTask.Fire(() => Endpoint
                 .WithTimeout(30)
                 .AllowAnyHttpStatus()
                 .AppendPathSegments("/@/")
@@ -118,29 +103,15 @@
                 {
                     {
                         new FileContent(pkg.FullName),
-                        "file", 
+                        "file",
                         Path.GetFileName(pkg.FullName)
                     }
-                });
-            new Task(() =>
-            {
-                while (!task.IsCompleted)
-                {
-                    Console.Write(".".Color(Color.Gray));
-                    Task.Delay(500).Wait();
-                }
-            }).Start();
+                }), x => x.IsSuccessStatusCode);
 
-            var result = await task;
-            
             if (result.IsSuccessStatusCode)
-            {
-                Console.WriteLine($" {"OK".Color(Color.GreenYellow)}");
                 return true;
-            }
-
-            var error = JsonConvert.DeserializeObject<ErrorResponse>(await result.Content.ReadAsStringAsync()); 
-            Console.WriteLine($" {"FAIL".Color(Color.Red)}");
+            
+            var error = JsonConvert.DeserializeObject<ErrorResponse>(await result.Content.ReadAsStringAsync());
             Console.WriteLine($"{":thought_balloon:".Emoji()} [{$"{(int)result.StatusCode}".Color(Color.Orange)}] {error.Message.Color(Color.Red)}");
             return false;
         }
@@ -149,29 +120,14 @@
         {
             Console.Write($"{":thought_balloon:".Emoji()} PROPFIND '{Name}/{id}'...".Color(Color.DimGray));
 
-            var task = Endpoint
+            var request = await RuneTask.Fire(() => Endpoint
                 .WithTimeout(30)
                 .AllowAnyHttpStatus()
                 .AppendPathSegment($"/@/{id}")
-                .SendAsync(new HttpMethod("PROPFIND"));
-
-            new Task(() =>
-            {
-                while (!task.IsCompleted)
-                {
-                    Console.Write(".".Color(Color.Gray));
-                    Task.Delay(500).Wait();
-                }
-            }).Start();
-
-            var request = await task;
+                .SendAsync(new HttpMethod("PROPFIND")), x => x.IsSuccessStatusCode);
 
             if (request.StatusCode == HttpStatusCode.OK)
-            {
-                Console.WriteLine(" OK".Color(Color.GreenYellow));
-
                 return true;
-            }
             Console.WriteLine($" {request.StatusCode}".Color(Color.Red));
             return false;
         }

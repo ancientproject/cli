@@ -71,7 +71,7 @@
                 Console.WriteLine($"{":thought_balloon:".Emoji()} [github] {"package".Nier()} '{owner}/{id}' box.json bad.".Color(Color.Orange));
                 return default;
             }
-            var raw = CSharpCompile.Build(id, await file.DownloadUrl.WithTimeout(10).GetStringAsync());
+            var raw = await CSharpCompile.BuildAsync(id, await file.DownloadUrl.WithTimeout(10).GetStringAsync());
             return (Assembly.Load(raw), raw, default);
         }
 

@@ -74,7 +74,7 @@
 
                 Indexer.FromLocal()
                     .UseLock()
-                    .SaveDep(asm, bytes, registry);
+                    .SaveDep(asm, bytes, spec);
                 AncientProject.FromLocal().AddDep(package, $"{spec.Version}", DepVersionKind.Fixed);
                 Console.WriteLine($"{":movie_camera:".Emoji()} '{package}-{spec.Version}' save to deps is {"success".Nier(0).Color(Color.GreenYellow)}.");
             }
