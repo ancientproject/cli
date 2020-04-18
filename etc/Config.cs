@@ -10,6 +10,8 @@
         public static string GetRaw() 
             => Dirs.ConfigFile.ReadToEnd();
 
+        public static string Get(string section, string key)
+            => Get<string>(section, key, null);
         public static T Get<T>(string section, string key, T @default)
         {
             var converter = TypeDescriptor.GetConverter(typeof(T));
