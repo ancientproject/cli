@@ -6,12 +6,11 @@
     using System.IO.Compression;
     using System.Linq;
     using System.Threading.Tasks;
-    using Ancient.ProjectSystem;
     using cli;
     using etc;
     using Internal;
 
-    public class PublishCommand : RuneCommand<PublishCommand>, IWithProject, IExecuterAsync
+    public class PublishCommand : RuneCommand<PublishCommand>, IWithProject
     {
         private readonly CommandOption _registry;
 
@@ -26,7 +25,7 @@
 
             app.HelpOption("-h|--help");
             var type = app.Option("-r|--registry <url>", "Registry url", CommandOptionType.SingleValue);
-            app.OnExecute(new PublishCommand(type));
+            app.OnExecute(new PublishCommand(type).ExecuteAsync);
 
             return app;
         }

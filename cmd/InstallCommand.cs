@@ -67,7 +67,7 @@
 
             try
             {
-                var (asm, bytes) = await Registry.By(registry).Fetch(package);
+                var (asm, bytes, spec) = await Registry.By(registry).Fetch(package);
 
                 if (asm is null)
                     return await Fail();
@@ -75,8 +75,8 @@
                 Indexer.FromLocal()
                     .UseLock()
                     .SaveDep(asm, bytes, registry);
-                AncientProject.FromLocal().AddDep(package, asm.GetName().Version.ToString(), DepVersionKind.Fixed);
-                Console.WriteLine($"{":movie_camera:".Emoji()} '{package}' save to deps is {"success".Nier(0).Color(Color.GreenYellow)}.");
+                AncientProject.FromLocal().AddDep(package, $"{spec.Version}", DepVersionKind.Fixed);
+                Console.WriteLine($"{":movie_camera:".Emoji()} '{package}-{spec.Version}' save to deps is {"success".Nier(0).Color(Color.GreenYellow)}.");
             }
             catch (Exception e)
             {
