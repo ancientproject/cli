@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Threading.Tasks;
     using Ancient.ProjectSystem;
     using cli;
     using Internal;
@@ -26,7 +27,7 @@
 
             return app;
         }
-        public int Execute(bool isTemp)
+        public async Task<int> Execute(bool isTemp)
         {
             var directory = Directory.GetCurrentDirectory();
             if (!this.Validate(directory))
@@ -35,19 +36,29 @@
             var ancient_home = Environment.GetEnvironmentVariable("ANCIENT_HOME", EnvironmentVariableTarget.User);
 
             if (ancient_home is null)
-                throw new InvalidOperationException($"Env variable 'ANCIENT_HOME' is not set.");
+                return await Fail($"Env variable 'ANCIENT_HOME' is not set.");
             if (!new DirectoryInfo(ancient_home).Exists)
-                throw new InvalidOperationException($"Env variable 'ANCIENT_HOME' is invalid.");
+                return await Fail($"Env variable 'ANCIENT_HOME' is invalid.");
 
-            var acc_home = Path.Combine(ancient_home, "compiler");
+
+
+            var acc_home = 
+                Environment.GetEnvironmentVariable("ANCIENT_COMPILER_HOME", EnvironmentVariableTarget.User) ?? 
+                Path.Combine(ancient_home, "compiler");
+
             var acc_bin = Path.Combine(acc_home, "acc.exe");
 
+
+
             if (!new DirectoryInfo(acc_home).Exists || !new FileInfo(acc_bin).Exists)
-                throw new InvalidOperationException($"Ancient compiler is not installed.");
+                return await Fail($"Ancient compiler is not installed.");
 
             var argBuilder = new List<string>();
 
             var files = Directory.GetFiles(directory, "*.asm");
+
+            if (!files.Any())
+                return await Fail($"'*.asm' sources code in '{directory}' for compile not found.");
 
             var outputDir = "bin";
 
