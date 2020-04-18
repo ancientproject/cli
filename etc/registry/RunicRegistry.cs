@@ -20,7 +20,7 @@
         public static string Endpoint = "https://registry.runic.cloud";
         public static string Name = "registry.runic.cloud";
 
-        public async Task<(Assembly, byte[])> Fetch(string id)
+        public async Task<(Assembly, byte[], RuneSpec)> Fetch(string id)
         {
             // todo: logic for cache
             //var cacheFolder = EnsureFolders();
@@ -88,13 +88,13 @@
             {
                 var targetDll = extractFolder.EnumerateFiles("*.dll", SearchOption.AllDirectories).First();
                 var targetAssembly = Assembly.LoadFile(targetDll.FullName);
-                return (targetAssembly, File.ReadAllBytes(targetDll.FullName));
+                return (targetAssembly, File.ReadAllBytes(targetDll.FullName), result.Spec);
             }
             else
             {
                 var targetDll = extractFolder.EnumerateFiles("*.cs", SearchOption.AllDirectories).First();
                 var raw = CSharpCompile.Build(id, await File.ReadAllTextAsync(targetDll.FullName));
-                return (Assembly.Load(raw), raw);
+                return (Assembly.Load(raw), raw, result.Spec);
             }
             
         }

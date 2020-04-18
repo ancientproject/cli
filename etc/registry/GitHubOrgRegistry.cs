@@ -35,7 +35,7 @@
             return result;
         }
 
-        public async Task<(Assembly assembly, byte[] raw)> Fetch(string id)
+        public async Task<(Assembly assembly, byte[] raw, RuneSpec spec)> Fetch(string id)
         {
             var repo = (await client.Repository.GetAllForUser(owner)).FirstOrDefault(x => x.Name == id);
             if (repo is null)
@@ -72,7 +72,7 @@
                 return default;
             }
             var raw = CSharpCompile.Build(id, await file.DownloadUrl.WithTimeout(10).GetStringAsync());
-            return (Assembly.Load(raw), raw);
+            return (Assembly.Load(raw), raw, default);
         }
 
         public Task<bool> Publish(FileInfo pkg, RuneSpec spec) => throw new NotImplementedException();

@@ -34,7 +34,7 @@
     public interface IRegistry
     {
         Task<bool> Exist(string id);
-        Task<(Assembly assembly, byte[] raw)> Fetch(string id);
+        Task<(Assembly assembly, byte[] raw, RuneSpec spec)> Fetch(string id);
 
         Task<bool> Publish(FileInfo pkg, RuneSpec spec);
     }
