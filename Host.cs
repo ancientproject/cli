@@ -33,7 +33,8 @@
             ["remove"]      = RemoveCommand.Run,
             ["restore"]     = RestoreCommand.Run,
             ["view"]        = ViewCommand.Run,
-            ["config"]      = ConfigCommand.Run
+            ["config"]      = ConfigCommand.Run,
+            ["publish"]     = PublishCommand.Run
         };
         public static Task<int> Main(string[] args)
         {
