@@ -25,11 +25,11 @@ jobs:
           prerelease: false
     - uses: actions/setup-node@master
       with:
-        version: 12
+        node-version: 12
         registry-url: 'https://registry.npmjs.org'
     
     - name: npm publish on every push
-      uses: shawnbot/npm-publish-action@v1.0.1
+      uses: primer/publish@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # NOTE: use the NODE_ prefix instead of NPM_ here!
