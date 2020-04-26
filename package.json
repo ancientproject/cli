@@ -1,6 +1,6 @@
 {
   "name": "@rune-temp/cli",
-  "version": "0.70.480-beta",
+  "version": "0.70.523-beta",
   "description": "command line interface for ancient vm",
   "repository": "https://github.com/ancientproject/cli.git",
   "author": "Yuuki Wesp",
