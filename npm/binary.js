@@ -1,5 +1,4 @@
 const { existsSync, createWriteStream } = require("fs");
-const { homedir } = require("os");
 const { join } = require("path");
 const { spawnSync } = require("child_process");
 const { URL } = require("universal-url");
@@ -7,7 +6,6 @@ const envPaths = require("env-paths");
 const mkdirp = require("mkdirp");
 const extract = require('extract-zip');
 const axios = require("axios");
-const tar = require("tar");
 const rimraf = require("rimraf");
 const ProgressBar = require('progress')
 class Binary {
@@ -134,6 +132,11 @@ class Binary {
                     throw e;
                 });
         });
+    }
+
+    exist() {
+        const binaryPath = this._getBinaryPath();
+        return existsSync(binaryPath);
     }
 
     uninstall() {

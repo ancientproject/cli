@@ -7,8 +7,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "postuninstall": "node npm/uninstall.js",
-    "postinstall": "node npm/install.js"
+    "postuninstall": "node npm/uninstall.js"
   },
   "dependencies": {
     "axios": "^0.19.2",
@@ -18,7 +17,6 @@
     "mkdirp": "^1.0.4",
     "progress": "^2.0.3",
     "rimraf": "^3.0.2",
-    "tar": "^6.0.1",
     "universal-url": "^2.0.0"
   },
   "files": [
