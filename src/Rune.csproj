@@ -8,7 +8,7 @@
     <RootNamespace>Rune.CLI</RootNamespace>
     <ApplicationIcon>resource\icon.ico</ApplicationIcon>
     <StartupObject></StartupObject>
-    <Version>0.70.480-beta</Version>
+    <Version>0.70.484-beta</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
@@ -22,10 +22,6 @@
     <PackageReference Include="Flurl" Version="2.8.2" />
     <PackageReference Include="Flurl.Http" Version="2.4.2" />
     <PackageReference Include="IniFile.NET" Version="1.6.0" />
-    <PackageReference Condition="$(Configuration) == 'Debug'" Include="Ivy.Versioning" Version="3.1.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.5.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="3.5.0" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="3.1.3" />

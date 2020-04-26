@@ -2,43 +2,73 @@ name: .NET Core
 
 on:
   push:
-    # Sequence of patterns matched against refs/tags
     tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
-
+      - 'v*'
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    
     steps:
     - uses: actions/checkout@v2
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@latest
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-      with:
-          tag_name: ${{ github.ref }}
-          release_name: rune-cli release
-          draft: false
-          prerelease: false
+#    - name: Create Release
+#      id: create_release
+#      uses: actions/create-release@latest
+#      env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      with:
+#          tag_name: ${{ github.ref }}
+#          release_name: rune-cli release
+#          draft: false
+#          prerelease: false
+
     - uses: actions/setup-node@master
       with:
         node-version: 12
         registry-url: 'https://registry.npmjs.org'
-    
-    - name: npm publish on every push
-      uses: primer/publish@master
+        always-auth: true
+
+    - run: npm -g install yarn
+    - run: yarn install
+    - run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
+    - run: echo ::set-env name=RELEASE_VERSION_SEMVER::$(echo ${GITHUB_REF:11})
+    - run: yarn config set email ${{ secrets.EMAIL }}
+    - run: yarn publish --access public --new-version ${{ env.RELEASE_VERSION_SEMVER }} --no-git-tag-version --non-interactive
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # NOTE: use the NODE_ prefix instead of NPM_ here!
         NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.101
+
     - name: Install dependencies
       run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+
+    - name: Pack linux-64
+      run: dotnet publish -c release -r linux-x64 -o "./../linux-64"
+
+#    - name: Pack win-64
+#      run: dotnet publish -c release -r win-x64 -o "./../win-64"
+
+#    - uses: actions/upload-artifact@master
+#      with:
+#        name: rune-cli-win64.zip
+#        path: ./../win-64
+    - uses: actions/upload-artifact@master
+      with:
+        name: rune-cli-linux-64.zip
+        path: ./../linux-64
+    - run: zip run-cli-linux-64.zip ./../linux-64/ -r -9
+
+    - name: Create Release
+      id: create_release_linux
+      uses: ncipollo/release-action@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        artifacts: "./**/*.zip"
+        allowUpdates: true 
+        commit: master 
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: ${{ github.ref }}
+        release_name: rune-cli release
+        draft: false
+        prerelease: false
