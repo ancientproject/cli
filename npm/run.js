@@ -2,7 +2,10 @@
 
 const getBinary = require('./getBinary');
 
-
 if(!getBinary().exist())
+{
+    console.log(">> installing binaries...");
     getBinary().install();
-getBinary().run();
+}
+else
+	getBinary().run();
