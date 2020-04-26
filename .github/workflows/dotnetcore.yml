@@ -1,4 +1,4 @@
-name: .NET Core
+name: publish release
 
 on:
   push:
@@ -45,13 +45,13 @@ jobs:
       with:
         name: rune-cli-linux-64.zip
         path: ./../linux-64
-    - run: zip run-cli-linux-64.zip ./../linux-64/ -r -9
-    - run: zip run-cli-win-64.zip ./../win-64/ -r -9
+    - run: zip rune-cli-linux-64.zip ./../linux-64/ -r -9
+    - run: zip rune-cli-win-64.zip ./../win-64/ -r -9
     - name: Create Release
       id: create_release_linux
       uses: ncipollo/release-action@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         artifacts: "./**/*.zip"
         allowUpdates: true 
