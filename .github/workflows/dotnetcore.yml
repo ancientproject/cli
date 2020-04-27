@@ -37,18 +37,22 @@ jobs:
     - name: Pack win-64
       run: dotnet publish -c release -r win-x64 -o "./../win-64"
 
-    - uses: actions/upload-artifact@master
-      with:
-        name: rune-cli-win64.zip
-        path: ./../win-64
-    - uses: actions/upload-artifact@master
-      with:
-        name: rune-cli-linux-64.zip
-        path: ./../linux-64
+#    - uses: actions/upload-artifact@master
+#      with:
+#        name: rune-cli-win64.zip
+#        path: ./../win-64
+#    - uses: actions/upload-artifact@master
+#      with:
+#        name: rune-cli-linux-64.zip
+#        path: ./../linux-64
     - run: zip rune-cli-linux-64.zip . -r -9
       working-directory: ./../linux-64/
     - run: zip rune-cli-win-64.zip . -r -9
       working-directory: ./../win-64/
+
+    - run: cp ./../win-64/rune-cli-win-64.zip ./rune-cli-win-64.zip
+    - run: cp ./../linux-64/rune-cli-linux-64.zip ./rune-cli-linux-64.zip
+  
     - name: Create Release
       id: create_release_linux
       uses: ncipollo/release-action@v1
