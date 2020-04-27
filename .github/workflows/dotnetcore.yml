@@ -48,7 +48,7 @@ jobs:
     - run: zip rune-cli-linux-64.zip . -r -9
       working-directory: ./../linux-64/
     - run: zip rune-cli-win-64.zip . -r -9
-      working-directory: /../win-64/
+      working-directory: ./../win-64/
     - name: Create Release
       id: create_release_linux
       uses: ncipollo/release-action@v1
