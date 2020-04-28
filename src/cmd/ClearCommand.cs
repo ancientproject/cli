@@ -6,10 +6,11 @@
     using Ancient.ProjectSystem;
     using cli;
     using etc;
+    using Internal;
 
-    public class ClearCommand
+    public class ClearCommand : RuneCommand<ClearCommand>
     {
-        public static async Task<int> Run(string[] args)
+        internal override CommandLineApplication Setup()
         {
             var app = new CommandLineApplication
             {
@@ -22,16 +23,7 @@
             app.HelpOption("-h|--help");
             var cmd = new ClearCommand();
             app.OnExecute(() => cmd.Execute());
-
-            try
-            {
-                return await app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString().Color(Color.Red));
-                return 1;
-            }
+            return app;
         }
 
         public int Execute()

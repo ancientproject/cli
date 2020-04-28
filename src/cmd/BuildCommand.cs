@@ -27,11 +27,12 @@
 
             return app;
         }
+
         public async Task<int> Execute(bool isTemp)
         {
             var directory = Directory.GetCurrentDirectory();
             if (!this.Validate(directory))
-                return 1;
+                return await Fail();
 
             var ancient_home = Environment.GetEnvironmentVariable("ANCIENT_HOME", EnvironmentVariableTarget.User);
 
