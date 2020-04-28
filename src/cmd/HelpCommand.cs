@@ -51,7 +51,7 @@
             builder.AppendLine($"Common Commands:");
 
             builder.AppendLine($"  {"new".Color(Color.CornflowerBlue)}          {"Initialize a basic Ancient project".Color(Color.DarkKhaki)}");
-            builder.AppendLine($"  {"new-scheme".Color(Color.CornflowerBlue)}   {"Initializes empty map file for Ancient VM Devices".Color(Color.DarkKhaki)}");
+            builder.AppendLine($"  {"scheme".Color(Color.CornflowerBlue)}       {"Initializes empty map file for Ancient VM Devices".Color(Color.DarkKhaki)}");
             builder.AppendLine($"  {"install".Color(Color.CornflowerBlue)}      {"Install device package from ancient registry".Color(Color.DarkKhaki)}");
             builder.AppendLine($"  {"clear".Color(Color.CornflowerBlue)}        {"Clearing deps in current project".Color(Color.DarkKhaki)}");
             builder.AppendLine($"  {"build".Color(Color.CornflowerBlue)}        {"Builds a Ancient project".Color(Color.DarkKhaki)}");
@@ -59,6 +59,8 @@
             builder.AppendLine($"  {"run".Color(Color.CornflowerBlue)}          {"Immediately executes a script from Ancient project".Color(Color.DarkKhaki)}");
             builder.AppendLine($"  {"vm".Color(Color.CornflowerBlue)}           {"Immediately build and execute project in Ancient VM".Color(Color.DarkKhaki)}");
             builder.AppendLine($"  {"view".Color(Color.CornflowerBlue)}         {"View file as hex table.".Color(Color.DarkKhaki)}");
+            builder.AppendLine($"  {"config".Color(Color.CornflowerBlue)}       {"Manage the rune configuration.".Color(Color.DarkKhaki)}");
+            builder.AppendLine($"  {"publish".Color(Color.CornflowerBlue)}      {"Publishes a package to the rune registry.".Color(Color.DarkKhaki)}");
             builder.AppendLine();
             return builder.ToString();
         }
