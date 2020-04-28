@@ -4,15 +4,16 @@
     using System.Diagnostics;
     using System.Drawing;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
     using Ancient.ProjectSystem;
     using cli;
     using etc;
     using Internal;
 
-    public class RestoreCommand : WithProject
+    public class RestoreCommand : RuneCommand<RestoreCommand>, IWithProject
     {
-        public static async Task<int> Run(string[] args)
+        internal override CommandLineApplication Setup()
         {
             var app = new CommandLineApplication
             {
@@ -26,15 +27,7 @@
             var cmd = new RestoreCommand();
             var registry = app.Option("--registry <url>", "registry url", CommandOptionType.SingleValue);
             app.OnExecute(() => cmd.Execute(registry));
-            try
-            {
-                return await app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString().Color(Color.Red));
-                return 1;
-            }
+            return app;
         }
 
 
@@ -42,40 +35,37 @@
         {
             var registry = registryOption.HasValue() ? registryOption.Value() : "github+https://github.com/ancientproject";
             var dir = Directory.GetCurrentDirectory();
-            if (!Validate(dir))
+            if (!this.Validate(dir))
                 return 1;
             var indexer = Indexer.FromLocal().UseLock();
-            foreach (var (package, _) in AncientProject.FromLocal().deps)
+            foreach (var package in AncientProject.FromLocal().deps.Cast<string>().Where(package => !indexer.Exist(package)))
             {
-                if (!indexer.Exist(package))
+                if(!await Registry.By(registry).Exist(package))
                 {
-                    if(!await Registry.By(registry).Exist(package))
-                    {
-                        Console.WriteLine($"{":page_with_curl:".Emoji()} '{package}' is {"not".Nier(0).Color(Color.Red)} found in '{registry}' registry.");
-                        continue;
-                    }
+                    Console.WriteLine($"{":page_with_curl:".Emoji()} '{package}' is {"not".Nier(0).Color(Color.Red)} found in '{registry}' registry.");
+                    continue;
+                }
 
-                    try
-                    {
-                        var (asm, bytes, spec) = await Registry.By(registry).Fetch(package);
+                try
+                {
+                    var (asm, bytes, spec) = await Registry.By(registry).Fetch(package);
 
-                        if (asm is null)
-                        {
-                            Console.WriteLine($"{":movie_camera:".Emoji()} '{package}' restore {"fail".Nier(0).Color(Color.Red)}.");
-                            continue;
-                        }
-
-                        Indexer.FromLocal()
-                            .UseLock()
-                            .SaveDep(asm, bytes, spec);
-                        Console.WriteLine($"{":movie_camera:".Emoji()} '{package}' restore {"success".Nier(0).Color(Color.GreenYellow)}.");
-                    }
-                    catch (Exception e)
+                    if (asm is null)
                     {
                         Console.WriteLine($"{":movie_camera:".Emoji()} '{package}' restore {"fail".Nier(0).Color(Color.Red)}.");
-                        Trace.WriteLine(e.ToString());
                         continue;
                     }
+
+                    Indexer.FromLocal()
+                        .UseLock()
+                        .SaveDep(asm, bytes, spec);
+                    Console.WriteLine($"{":movie_camera:".Emoji()} '{package}' restore {"success".Nier(0).Color(Color.GreenYellow)}.");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{":movie_camera:".Emoji()} '{package}' restore {"fail".Nier(0).Color(Color.Red)}.");
+                    Trace.WriteLine(e.ToString());
+                    continue;
                 }
             }
             return 0;

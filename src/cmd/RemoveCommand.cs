@@ -6,11 +6,12 @@
     using Ancient.ProjectSystem;
     using cli;
     using etc;
+    using Internal;
     using static System.Console;
 
-    public class RemoveCommand
+    public class RemoveCommand : RuneCommand<RemoveCommand>
     {
-        public static async Task<int> Run(string[] args)
+        internal override CommandLineApplication Setup()
         {
             var app = new CommandLineApplication
             {
@@ -24,16 +25,7 @@
             var package = app.Argument("<package>", "package name");
             var cmd = new RemoveCommand();
             app.OnExecute(() => cmd.Execute(package.Value));
-
-            try
-            {
-                return await app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-                WriteLine(ex.ToString().Color(Color.Red));
-                return 1;
-            }
+            return app;
         }
 
         public int Execute(string id)

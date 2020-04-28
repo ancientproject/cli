@@ -1,19 +1,17 @@
 ﻿namespace rune.cmd
 {
-    using System;
-    using System.Drawing;
     using System.IO;
     using System.Linq;
-    using System.Threading.Tasks;
     using Ancient.ProjectSystem;
     using cli;
     using DustInTheWind.ConsoleTools.InputControls;
     using etc;
+    using Internal;
     using Newtonsoft.Json;
 
-    public class NewCommand
+    public class NewCommand : RuneCommand<NewCommand>
     {
-        public static async Task<int> Run(string[] args)
+        internal override CommandLineApplication Setup()
         {
             var app = new CommandLineApplication
             {
@@ -26,24 +24,20 @@
 
             var dotnetNew = new NewCommand();
             app.OnExecute(() => dotnetNew.CreateEmptyProject());
-
-            try
-            {
-                return await app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString().Color(Color.Red));
-                return 1;
-            }
+            return app;
         }
 
         private int CreateEmptyProject()
         {
-            var projectName = new ValueView<string>($"[1/4] {":drum:".Emoji()} Project Name:").WithDefault(Directory.GetCurrentDirectory().Split('/').Last()).Read();
-            var version = new ValueView<string>($"[2/4] {":boom:".Emoji()} Project Version:").WithDefault("0.0.0").Read();
-            var desc = new ValueView<string>($"[3/4] {":balloon:".Emoji()} Project Description:").WithDefault("").Read();
-            var author = new ValueView<string>($"[4/4] {":skull:".Emoji()} Project Author:").WithDefault("").Read();
+            var projectName 
+                = new ValueView<string>($"[1/4] {":drum:".Emoji()} Project Name:").WithDefault(Directory.GetCurrentDirectory().Split('/').Last()).Read();
+            var version 
+                = new ValueView<string>($"[2/4] {":boom:".Emoji()} Project Version:").WithDefault("0.0.0").Read();
+            var desc 
+                = new ValueView<string>($"[3/4] {":balloon:".Emoji()} Project Description:").WithDefault("").Read();
+            var author 
+                = new ValueView<string>($"[4/4] {":skull:".Emoji()} Project Author:").WithDefault("").Read();
+
             var dir = Directory.GetCurrentDirectory();
 
             var proj = new AncientProjectFile
@@ -55,7 +49,7 @@
 
             proj.scripts.Add($"start", "echo 1");
 
-            File.WriteAllText($"{Path.Combine(dir, $"{projectName}.rune.json")}", JsonConvert.SerializeObject(proj));
+            File.WriteAllText($"{Path.Combine(dir, $"{projectName}.rune.json")}", JsonConvert.SerializeObject(proj, Formatting.Indented));
 
             return 0;
         }
