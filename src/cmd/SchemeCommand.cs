@@ -7,33 +7,24 @@
     using Ancient.ProjectSystem;
     using cli;
     using etc;
+    using Internal;
     using Newtonsoft.Json;
 
-    public class SchemeCommand
+    public class SchemeCommand : RuneCommand<SchemeCommand>
     {
-        public static async Task<int> Run(string[] args)
+        internal override CommandLineApplication Setup()
         {
             var app = new CommandLineApplication
             {
-                Name = "rune new-scheme",
+                Name = "rune scheme",
                 FullName = "Ancient device-mapper initializer",
                 Description = "Initializes empty map file for Ancient VM Devices"
             };
-
-
             app.HelpOption("-h|--help");
             var cmd = new SchemeCommand();
             app.OnExecute(() => cmd.Execute());
 
-            try
-            {
-                return await app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString().Color(Color.Red));
-                return 1;
-            }
+            return app;
         }
 
         public int Execute()
@@ -52,7 +43,7 @@
             sc.scheme.Add("memory", "0x0");
             sc.scheme.Add("bios", "0x45");
             
-            File.WriteAllText(scheme, JsonConvert.SerializeObject(sc));
+            File.WriteAllText(scheme, JsonConvert.SerializeObject(sc, Formatting.Indented));
             Console.WriteLine($"{":dizzy:".Emoji()} {"Success".Nier().Color(Color.GreenYellow)} write device scheme to '{"./device.scheme".Color(Color.Gray)}'");
             return 0;
         }

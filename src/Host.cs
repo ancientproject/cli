@@ -27,7 +27,7 @@
             ["run"]         = RunCommand.Run,
             ["build"]       = BuildCommand.Run,
             ["vm"]          = VMCommand.Run,
-            ["new-scheme"]  = SchemeCommand.Run,
+            ["scheme"]      = SchemeCommand.Run,
             ["install"]     = InstallCommand.Run,
             ["clear"]       = ClearCommand.Run,
             ["remove"]      = RemoveCommand.Run,
