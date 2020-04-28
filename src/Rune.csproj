@@ -1,5 +1,4 @@
-﻿
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,10 +7,18 @@
     <RootNamespace>Rune.CLI</RootNamespace>
     <ApplicationIcon>resource\icon.ico</ApplicationIcon>
     <StartupObject></StartupObject>
-    <Version>0.70.523-beta</Version>
+    <Version>0.70.525-beta</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="node_modules\**" />
+    <EmbeddedResource Remove="node_modules\**" />
+    <None Remove="node_modules\**" />
+    <None Remove="*.log" />
+    <None Remove="yarn.lock" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Ancient.ProjectSystem" Version="0.60.358.20" />
@@ -22,6 +29,10 @@
     <PackageReference Include="Flurl" Version="2.8.2" />
     <PackageReference Include="Flurl.Http" Version="2.4.2" />
     <PackageReference Include="IniFile.NET" Version="1.6.0" />
+    <PackageReference Include="Ivy.Versioning" Version="3.1.0-beta.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.5.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="3.5.0" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="3.1.3" />
