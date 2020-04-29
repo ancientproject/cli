@@ -53,7 +53,6 @@
 
         public static void Ensure()
         {
-            Dirs.Ensure();
             if(Dirs.ConfigFile.Exists)
                 return;
             var c = new Ini();
