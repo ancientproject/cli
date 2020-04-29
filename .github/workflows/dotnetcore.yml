@@ -21,6 +21,7 @@ jobs:
     - run: echo ::set-env name=RELEASE_VERSION_SEMVER::$(echo ${GITHUB_REF:11})
     - run: yarn config set email ${{ secrets.EMAIL }}
     - run: yarn publish --access public --new-version ${{ env.RELEASE_VERSION_SEMVER }} --no-git-tag-version --non-interactive
+      continue-on-error: true
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
     - name: Setup .NET Core
