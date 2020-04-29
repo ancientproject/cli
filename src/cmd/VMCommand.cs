@@ -2,13 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Drawing;
     using System.IO;
+    using System.IO.Compression;
     using System.Linq;
     using System.Threading.Tasks;
     using cli;
     using etc;
     using Internal;
+    using MoreLinq;
 
     public class VMCommand : RuneCommand<VMCommand>, IWithProject
     {
@@ -20,6 +21,8 @@
                 FullName = "Ancient project execute in vm",
                 Description = "Execute project in Ancient VM"
             };
+
+            app.Command("install", InstallVM);
 
             app.HelpOption("-h|--help");
             var dotnetBuild = new BuildCommand();
@@ -38,29 +41,82 @@
             return app;
         }
 
+        internal void InstallACC(CommandLineApplication app)
+        {
+            app.Description = $"Install latest ancient compiler.";
+            var force = app.Option("-f|--force", "Force install binaries?", CommandOptionType.BoolValue);
+
+            bool isForce() => force.HasValue() && force.BoolValue != null && force.BoolValue.Value;
+            app.OnExecute(async () =>
+            {
+                try
+                {
+                    if (!isForce() && Dirs.CompilerFolder.EnumerateFiles().Any())
+                        return await Fail($"{":x:".Emoji()} {"Already".Nier(2)} installed. Try rune vm install compiler --force");
+
+
+                    if (Dirs.CompilerFolder.EnumerateFiles().Any())
+                        _ = Dirs.CompilerFolder.EnumerateFiles().Pipe(x => x.Delete()).ToArray();
+
+                    var result = await Appx.By(AppxType.acc)
+                        .DownloadAsync();
+                    Console.Write($"{":open_file_folder:".Emoji()} Extract files");
+                    await RuneTask.Fire(() =>
+                        ZipFile.ExtractToDirectory(result.FullName, Dirs.CompilerFolder.FullName));
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                return await Success();
+            });
+        }
+
+        internal void InstallVM(CommandLineApplication app)
+        {
+            app.Description = $"Install latest ancient VM.";
+            var force = app.Option("-f|--force", "Force install binaries?", CommandOptionType.BoolValue);
+
+            bool isForce() => force.HasValue() && force.BoolValue != null && force.BoolValue.Value;
+            app.Command("compiler", InstallACC);
+            app.OnExecute(async () =>
+            {
+                try
+                {
+                    if (!isForce() && Dirs.VMFolder.EnumerateFiles().Any())
+                        return await Fail($"{":x:".Emoji()} {"Already".Nier(2)} installed. Try rune vm install --force");
+
+
+                    if (Dirs.VMFolder.EnumerateFiles().Any())
+                        _ = Dirs.VMFolder.EnumerateFiles().Pipe(x => x.Delete()).ToArray();
+
+                    var result = await Appx.By(AppxType.vm)
+                        .DownloadAsync();
+                    Console.Write($"{":open_file_folder:".Emoji()} Extract files");
+                    await RuneTask.Fire(() => 
+                        ZipFile.ExtractToDirectory(result.FullName, Dirs.VMFolder.FullName));
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                return await Success();
+            });
+        }
+
+
         internal async Task<int> Execute(CommandOption isDebug, CommandOption keepMemory, CommandOption fastWrite, CommandOption isInteractive)
         {
             var dir = Directory.GetCurrentDirectory();
             if (!this.Validate(dir))
                 return await Fail();
 
-            var ancient_home = Environment.GetEnvironmentVariable("ANCIENT_HOME", EnvironmentVariableTarget.User);
-
-            if (ancient_home is null)
-                return await Fail($"Env variable 'ANCIENT_HOME' is not set.");
-            if (!new DirectoryInfo(ancient_home).Exists)
-                return await Fail($"Env variable 'ANCIENT_HOME' is invalid.");
-
-            var vm_home = 
-                Environment.GetEnvironmentVariable("ANCIENT_VM_HOME", EnvironmentVariableTarget.User) ?? 
-                Path.Combine(ancient_home, "vm");
+            if (!Dirs.Bin.VM.Exists)
+                return await Fail($"VM is not installed. Try 'rune vm install'");
 
 
+            var vm_bin = Dirs.Bin.VM.FullName;
 
-            var vm_bin = Path.Combine(vm_home, "vm.exe");
-
-            if (!new DirectoryInfo(vm_home).Exists || !new FileInfo(vm_bin).Exists)
-                return await Fail($"Ancient VM is not installed.");
 
             var argBuilder = new List<string>();
 
