@@ -2,12 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.IO;
     using System.IO.Compression;
     using System.Linq;
     using System.Threading.Tasks;
     using cli;
     using etc;
+    using etc.ExternalCommand;
     using Internal;
     using MoreLinq;
 
@@ -130,14 +132,29 @@
                 argBuilder.Add($"\"{Path.Combine("obj", Path.GetFileNameWithoutExtension(files.First()))}\"");
 
             var external = new ExternalTools(vm_bin, string.Join(" ", argBuilder));
-            return external
+
+            var result = external
                 .WithEnv("VM_ATTACH_DEBUGGER", isDebug.BoolValue.HasValue)
                 .WithEnv("VM_KEEP_MEMORY", keepMemory.BoolValue.HasValue)
                 .WithEnv("VM_MEM_FAST_WRITE", fastWrite.BoolValue.HasValue)
                 .WithEnv("REPL", isInteractive.BoolValue.HasValue)
                 .WithEnv("CLI", true)
-                .WithEnv("CLI_WORK_PATH", dir)
+                .WithEnv("CLI_WORK_PATH", dir);
 
+            try
+            {
+                return result
+                    .Start()
+                    .Wait()
+                    .ExitCode();
+            }
+            catch (Win32Exception e)
+            {
+                Console.WriteLine($"{":x:".Emoji()} {e.Message}");
+                Console.WriteLine($"{"TODO"} try fix...");
+                await OS.FireAsync($"chmod +x \"{vm_bin}\"");
+            }
+            return result
                 .Start()
                 .Wait()
                 .ExitCode();
