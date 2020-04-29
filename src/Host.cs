@@ -78,9 +78,8 @@
                 WriteLine($"no windows-terminal: coloring, emoji and nier has disabled.");
                 ForegroundColor = ConsoleColor.White;
             }
-
-            if (!Dirs.ConfigFile.Exists) 
-                Config.Ensure();
+            Dirs.Ensure();
+            Config.Ensure();
         }
 
         internal static bool Verbose { get; set; }
@@ -156,15 +155,17 @@
         }
         private static void PrintInfo()
         {
-            var env = GetEnvironmentVariable("ANCIENT_HOME", EnvironmentVariableTarget.User) ?? "<NOT SET>";
+            var vmFolder = Dirs.Bin.VM.Exists ? Dirs.VMFolder.FullName : "<NOT SET>";
+            var accFolder = Dirs.Bin.ACC.Exists ? Dirs.CompilerFolder.FullName : "<NOT SET>";
 
 
-            WriteLine($" OS Name     : {RuntimeEnvironment.OperatingSystem}");
-            WriteLine($" OS Version  : {RuntimeEnvironment.OperatingSystemVersion}");
-            WriteLine($" OS Arch     : {RuntimeEnvironment.RuntimeArchitecture}");
-            WriteLine($" Base Path   : {ApplicationEnvironment.ApplicationBasePath}");
-            WriteLine($" Config Path : {Dirs.ConfigFile.FullName}");
-            WriteLine($" VM Path     : {env}");
+            WriteLine($" OS Name       : {RuntimeEnvironment.OperatingSystem}");
+            WriteLine($" OS Version    : {RuntimeEnvironment.OperatingSystemVersion}");
+            WriteLine($" OS Arch       : {RuntimeEnvironment.RuntimeArchitecture}");
+            WriteLine($" Base Path     : {ApplicationEnvironment.ApplicationBasePath}");
+            WriteLine($" Config Path   : {Dirs.ConfigFile.FullName}");
+            WriteLine($" VM Path       : {vmFolder}");
+            WriteLine($" Compiler Path : {accFolder}");
 
         }
         private static bool IsArg(string candidate, string longName) 
