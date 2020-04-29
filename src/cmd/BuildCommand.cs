@@ -7,6 +7,7 @@
     using System.Threading.Tasks;
     using Ancient.ProjectSystem;
     using cli;
+    using etc;
     using Internal;
 
     public class BuildCommand : RuneCommand<BuildCommand>, IWithProject
@@ -34,25 +35,12 @@
             if (!this.Validate(directory))
                 return await Fail();
 
-            var ancient_home = Environment.GetEnvironmentVariable("ANCIENT_HOME", EnvironmentVariableTarget.User);
-
-            if (ancient_home is null)
-                return await Fail($"Env variable 'ANCIENT_HOME' is not set.");
-            if (!new DirectoryInfo(ancient_home).Exists)
-                return await Fail($"Env variable 'ANCIENT_HOME' is invalid.");
+            if (!Dirs.Bin.ACC.Exists)
+                return await Fail($"Compiler is not installed. Try 'rune vm install compiler'");
 
 
+            var acc_bin = Dirs.Bin.ACC.FullName;
 
-            var acc_home = 
-                Environment.GetEnvironmentVariable("ANCIENT_COMPILER_HOME", EnvironmentVariableTarget.User) ?? 
-                Path.Combine(ancient_home, "compiler");
-
-            var acc_bin = Path.Combine(acc_home, "acc.exe");
-
-
-
-            if (!new DirectoryInfo(acc_home).Exists || !new FileInfo(acc_bin).Exists)
-                return await Fail($"Ancient compiler is not installed.");
 
             var argBuilder = new List<string>();
 
