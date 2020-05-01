@@ -38,7 +38,7 @@
             if (!this.Validate(dir))
                 return 1;
             var indexer = Indexer.FromLocal().UseLock();
-            foreach (var package in AncientProject.FromLocal().deps.Cast<string>().Where(package => !indexer.Exist(package)))
+            foreach (var package in AncientProject.FromLocal().deps.Select(x => x.Key).Where(package => !indexer.Exist(package)))
             {
                 if(!await Registry.By(registry).Exist(package))
                 {
@@ -68,7 +68,7 @@
                     continue;
                 }
             }
-            return 0;
+            return await Success();
         }
     }
 }
