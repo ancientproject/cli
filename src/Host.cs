@@ -36,19 +36,22 @@
             ["config"]      = ConfigCommand.Run,
             ["publish"]     = PublishCommand.Run
         };
-        public static Task<int> Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
             InitializeProcess();
-
+            RuneSelfUpdater.Check();
+            var result = 0;
             try
             {
-                return ProcessArgs(args);
+                result = await ProcessArgs(args);
             }
             catch (Exception e)
             {
                 WriteLine(e.Message.Color(Color.OrangeRed));
-                return Task.FromResult(1);
+                result = 1;
             }
+            RuneSelfUpdater.DisplayIfNeeded();
+            return result;
         }
         private static void InitializeProcess()
         {
