@@ -13,7 +13,7 @@
     {
         public async Task<ExecuteResult> Execute(string cmd, TimeSpan timeoutWait)
         {
-            var binaries = new[] { "/usr/bin/zsh", "/bin/bash" }.Where(x => x.AsFile().Exists).ToArray();
+            var binaries = new[] { "/bin/bash", "/usr/bin/zsh" }.Where(x => x.AsFile().Exists).ToArray();
 
             if (!binaries.Any())
                 return new ExecuteResult(ElevateResult.UNK, "", "zsh/bash not found.", "-1");
@@ -26,8 +26,6 @@
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo(bin, string.Join(" ", command))
-                {
-                }
             };
             Console.WriteLine($"Starting process '{bin}' when args '{string.Join(" ", command)}'...");
 
