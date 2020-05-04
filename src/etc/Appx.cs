@@ -25,9 +25,10 @@
 
         public async ValueTask<FileInfo> DownloadAsync()
         {
-            var release = await $"https://api.github.com/repos/{_owner}/{_repo}/releases/latest"
+            var releases = await $"https://api.github.com/repos/{_owner}/{_repo}/releases"
                 .WithHeader("User-Agent", $"RuneCLI/{HelpCommand.GetVersion()}")
-                .GetJsonAsync<GithubRelease>();
+                .GetJsonAsync<GithubRelease[]>();
+            var release = releases.First();
             var targetFile = Config.Get($"github_{_type}", "file", $"{_type}-{OS}.zip");
 
             var asset = release.Assets.FirstOrDefault(x => x.Name == targetFile);
