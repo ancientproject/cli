@@ -45,7 +45,7 @@
             var registry = 
                 registryOption.HasValue() ? 
                     registryOption.Value() : 
-                    Config.Get("core", "registry", "github+https://github.com/ancientproject");
+                    Config.Get("core", "registry", "runic");
 
             var dir = Directory.GetCurrentDirectory();
 
