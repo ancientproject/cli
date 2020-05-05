@@ -15,8 +15,8 @@ jobs:
         registry-url: 'https://registry.npmjs.org'
         always-auth: true
 
-    - run: npm -g install yarn
-    - run: yarn install
+    - run: npm -g install yarn 
+    - run: yarn install --ignore-script
     - run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
     - run: echo ::set-env name=RELEASE_VERSION_SEMVER::$(echo ${GITHUB_REF:11})
     - run: yarn config set email ${{ secrets.EMAIL }}
