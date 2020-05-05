@@ -33,7 +33,7 @@
 
         public async Task<int> Execute(CommandOption registryOption)
         {
-            var registry = registryOption.HasValue() ? registryOption.Value() : "github+https://github.com/ancientproject";
+            var registry = registryOption.HasValue() ? registryOption.Value() : "runic";
             var dir = Directory.GetCurrentDirectory();
             if (!this.Validate(dir))
                 return 1;
