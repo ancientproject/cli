@@ -1,13 +1,14 @@
 {
   "name": "@rune-temp/cli",
-  "version": "0.70.523-beta",
+  "version": "0.70.616-beta",
   "description": "command line interface for ancient vm",
   "repository": "https://github.com/ancientproject/cli.git",
   "author": "Yuuki Wesp",
   "license": "MIT",
   "private": false,
   "scripts": {
-    "postuninstall": "node npm/uninstall.js"
+    "postuninstall": "node npm/uninstall.js",
+    "postinstall": "node npn/install.js"
   },
   "dependencies": {
     "axios": "^0.19.2",
