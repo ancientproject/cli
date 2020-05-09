@@ -29,7 +29,7 @@
                 .WithHeader("User-Agent", $"RuneCLI/{HelpCommand.GetVersion()}")
                 .GetJsonAsync<GithubRelease[]>();
             var release = releases.First();
-            var targetFile = Config.Get($"github_{_type}", "file", $"{_type}-{OS}.zip");
+            var targetFile = Config.Get($"github_{_type}", "file", $"{_type}-{OS}-{Arch}.zip");
 
             var asset = release.Assets.FirstOrDefault(x => x.Name == targetFile);
 
@@ -56,7 +56,8 @@
             return new FileInfo(Path.Combine(Dirs.CacheFolder.FullName, targetFile));
         }
 
-
+        private string Arch 
+            => RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
         private string OS 
         {
             get
@@ -65,11 +66,11 @@
                     throw new NotSupportedException($"{RuntimeInformation.ProcessArchitecture} is not support.");
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    return "win64";
+                    return "win10";
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                    return "linux64";
+                    return "linux";
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                    return "osx64";
+                    return $"osx.10.14";
                 throw new NotSupportedException($"{RuntimeInformation.OSDescription} is not support.");
             }
         }
