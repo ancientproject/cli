@@ -1,5 +1,5 @@
 {
-  "name": "@rune-temp/cli",
+  "name": "@rune/cli",
   "version": "0.70.616-beta",
   "description": "command line interface for ancient vm",
   "repository": "https://github.com/ancientproject/cli.git",
