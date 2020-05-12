@@ -1,17 +1,15 @@
 ﻿namespace rune.cmd
 {
-    using System;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
-    using System.IO.Compression;
     using System.Linq;
     using System.Threading.Tasks;
     using cli;
     using etc;
     using etc.ExternalCommand;
     using Internal;
-    using MoreLinq;
+    using static System.Console;
 
     public class VMCommand : RuneCommand<VMCommand>, IWithProject
     {
@@ -23,8 +21,6 @@
                 FullName = "Ancient project execute in vm",
                 Description = "Execute project in Ancient VM"
             };
-
-            app.Command("install", InstallVM);
 
             app.HelpOption("-h|--help");
             var dotnetBuild = new BuildCommand();
@@ -42,71 +38,7 @@
             });
             return app;
         }
-
-        internal void InstallACC(CommandLineApplication app)
-        {
-            app.Description = $"Install latest ancient compiler.";
-            var force = app.Option("-f|--force", "Force install binaries?", CommandOptionType.BoolValue);
-
-            bool isForce() => force.HasValue() && force.BoolValue != null && force.BoolValue.Value;
-            app.OnExecute(async () =>
-            {
-                try
-                {
-                    if (!isForce() && Dirs.CompilerFolder.EnumerateFiles().Any())
-                        return await Fail($"{":x:".Emoji()} {"Already".Nier(2)} installed. Try rune vm install compiler --force");
-
-
-                    if (Dirs.CompilerFolder.EnumerateFiles().Any())
-                        _ = Dirs.CompilerFolder.EnumerateFiles().Pipe(x => x.Delete()).ToArray();
-
-                    var result = await Appx.By(AppxType.acc)
-                        .DownloadAsync();
-                    Console.Write($"{":open_file_folder:".Emoji()} Extract files");
-                    await RuneTask.Fire(() =>
-                        ZipFile.ExtractToDirectory(result.FullName, Dirs.CompilerFolder.FullName));
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-                return await Success();
-            });
-        }
-
-        internal void InstallVM(CommandLineApplication app)
-        {
-            app.Description = $"Install latest ancient VM.";
-            var force = app.Option("-f|--force", "Force install binaries?", CommandOptionType.BoolValue);
-
-            bool isForce() => force.HasValue() && force.BoolValue != null && force.BoolValue.Value;
-            app.Command("compiler", InstallACC);
-            app.OnExecute(async () =>
-            {
-                try
-                {
-                    if (!isForce() && Dirs.VMFolder.EnumerateFiles().Any())
-                        return await Fail($"{":x:".Emoji()} {"Already".Nier(2)} installed. Try rune vm install --force");
-
-
-                    if (Dirs.VMFolder.EnumerateFiles().Any())
-                        _ = Dirs.VMFolder.EnumerateFiles().Pipe(x => x.Delete()).ToArray();
-
-                    var result = await Appx.By(AppxType.vm)
-                        .DownloadAsync();
-                    Console.Write($"{":open_file_folder:".Emoji()} Extract files");
-                    await RuneTask.Fire(() => 
-                        ZipFile.ExtractToDirectory(result.FullName, Dirs.VMFolder.FullName));
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-                return await Success();
-            });
-        }
-
-
+        
         internal async Task<int> Execute(CommandOption isDebug, CommandOption keepMemory, CommandOption fastWrite, CommandOption isInteractive)
         {
             var dir = Directory.GetCurrentDirectory();
@@ -114,7 +46,7 @@
                 return await Fail();
 
             if (!Dirs.Bin.VM.Exists)
-                return await Fail($"VM is not installed. Try 'rune vm install'");
+                return await Fail($"VM is not installed. Try 'rune install vm'");
 
 
             var vm_bin = Dirs.Bin.VM.FullName;
@@ -148,16 +80,11 @@
                     .Wait()
                     .ExitCode();
             }
-            catch (Win32Exception e)
+            catch (Win32Exception e) // AccessDenied on linux
             {
-                Console.WriteLine($"{":x:".Emoji()} {e.Message}");
-                Console.WriteLine($"{"TODO"} try fix...");
-                await OS.FireAsync($"chmod +x \"{vm_bin}\"");
+                WriteLine($"{":x:".Emoji()} {e.Message}");
+                return await Fail($"Run [chmod +x \"{vm_bin}\"] for resolve this problem.");
             }
-            return result
-                .Start()
-                .Wait()
-                .ExitCode();
         }
     }
 }

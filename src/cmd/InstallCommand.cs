@@ -3,11 +3,14 @@
     using System;
     using System.Drawing;
     using System.IO;
+    using System.IO.Compression;
+    using System.Linq;
     using System.Threading.Tasks;
     using Ancient.ProjectSystem;
     using cli;
     using etc;
     using Internal;
+    using MoreLinq;
 
     public class InstallCommand : RuneCommand<InstallCommand>, IWithProject
     {
@@ -42,6 +45,11 @@
 
         public async Task<int> Execute(string package, CommandOption registryOption)
         {
+            if (package == "vm")
+                return await InstallVMBinaries();
+            if (package == "acc" || package == "compiler")
+                return await InstallCompilerBinaries();
+
             var registry = 
                 registryOption.HasValue() ? 
                     registryOption.Value() : 
@@ -82,6 +90,53 @@
             {
                 Console.WriteLine(e.ToString().Color(Color.Red));
                 return await Fail(2);
+            }
+            return await Success();
+        }
+
+        private async Task<int> InstallCompilerBinaries()
+        {
+            try
+            {
+                if (Dirs.CompilerFolder.EnumerateFiles().Any())
+                    Console.WriteLine($"Detected already installed compiler, reinstall...".Color(Color.Orange));
+
+
+                if (Dirs.CompilerFolder.EnumerateFiles().Any())
+                    _ = Dirs.CompilerFolder.EnumerateFiles().Pipe(x => x.Delete()).ToArray();
+
+                var result = await Appx.By(AppxType.acc)
+                    .DownloadAsync();
+                Console.Write($"{":open_file_folder:".Emoji()} Extract files");
+                await RuneTask.Fire(() =>
+                    ZipFile.ExtractToDirectory(result.FullName, Dirs.CompilerFolder.FullName));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return await Success();
+        }
+        private async Task<int> InstallVMBinaries()
+        {
+            try
+            {
+                if (Dirs.CompilerFolder.EnumerateFiles().Any())
+                    Console.WriteLine($"Detected already installed vm, reinstall...".Color(Color.Orange));
+
+
+                if (Dirs.CompilerFolder.EnumerateFiles().Any())
+                    _ = Dirs.CompilerFolder.EnumerateFiles().Pipe(x => x.Delete()).ToArray();
+
+                var result = await Appx.By(AppxType.acc)
+                    .DownloadAsync();
+                Console.Write($"{":open_file_folder:".Emoji()} Extract files");
+                await RuneTask.Fire(() =>
+                    ZipFile.ExtractToDirectory(result.FullName, Dirs.CompilerFolder.FullName));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
             return await Success();
         }
