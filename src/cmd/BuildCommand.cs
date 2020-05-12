@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -36,7 +37,7 @@
                 return await Fail();
 
             if (!Dirs.Bin.ACC.Exists)
-                return await Fail($"Compiler is not installed. Try 'rune vm install compiler'");
+                return await Fail($"Compiler is not installed. Try 'rune install compiler'");
 
 
             var acc_bin = Dirs.Bin.ACC.FullName;
@@ -61,7 +62,15 @@
 
             var external = new ExternalTools(acc_bin, string.Join(" ", argBuilder));
             Directory.CreateDirectory(Path.Combine(directory, outputDir));
-            return external.Start().Wait().ExitCode();
+            try
+            {
+                return external.Start().Wait().ExitCode();
+            }
+            catch (Win32Exception e) // AccessDenied on linux
+            {
+                Console.WriteLine($"{":x:".Emoji()} {e.Message}");
+                return await Fail($"Run [chmod +x \"{acc_bin}\"] for resolve this problem.");
+            }
         }
     }
 }
