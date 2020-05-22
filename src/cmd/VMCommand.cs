@@ -1,5 +1,6 @@
 ﻿namespace rune.cmd
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
@@ -60,8 +61,19 @@
             var files = Directory.GetFiles(Path.Combine("obj"), "*.*")
                 .Where(x => x.EndsWith(".dlx") || x.EndsWith(".bios")).ToArray();
 
-            if (files.Any())
-                argBuilder.Add($"\"{Path.Combine("obj", Path.GetFileNameWithoutExtension(files.First()))}\"");
+            if (files.Length > 1 && !files.Any(x => x.Contains("entry")))
+                return await Fail($"Cannot find 'entry.dlx'");
+
+            string GetRunArg(Func<string, bool> predicate)
+            {
+                var target = files.First(predicate);
+                var formatted = Path.GetFileNameWithoutExtension(target);
+                return $"\"{Path.Combine("obj", formatted)}\"";
+            }
+
+            argBuilder.Add(files.Length == 1 ?
+                GetRunArg(_ => true) : 
+                GetRunArg(x => x.Contains("entry")));
 
             var external = new ExternalTools(vm_bin, string.Join(" ", argBuilder));
 

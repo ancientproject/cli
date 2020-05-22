@@ -3,10 +3,12 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Drawing;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using Ancient.ProjectSystem;
+    using ancient.runtime;
     using cli;
     using etc;
     using Internal;
@@ -41,36 +43,46 @@
 
 
             var acc_bin = Dirs.Bin.ACC.FullName;
-
-
-            var argBuilder = new List<string>();
-
             var files = Directory.GetFiles(directory, "*.asm");
 
             if (!files.Any())
                 return await Fail($"'*.asm' sources code in '{directory}' for compile not found.");
 
-            var outputDir = "bin";
+            if(!files.Any(x => x.Contains("entry")))
+                Console.WriteLine($"{":warning:".Emoji()} {"'entry.asm' file not found, maybe VM cannot start executing files.".Color(Color.Orange)}");
 
-            if (isTemp)
-                outputDir = "obj";
-            var Project = AncientProject.FromLocal();
-            argBuilder.Add($"-o ./{outputDir}/{Project.Name}");
-            if (Project.Extension != null)
-                argBuilder.Add($"-e {Project.Extension}");
-            argBuilder.Add($"-s \"{files.First()}\"");
-
-            var external = new ExternalTools(acc_bin, string.Join(" ", argBuilder));
-            Directory.CreateDirectory(Path.Combine(directory, outputDir));
             try
             {
-                return external.Start().Wait().ExitCode();
+                foreach (var file in files) Compile(file, isTemp);
+                return await Success();
             }
             catch (Win32Exception e) // AccessDenied on linux
             {
                 Console.WriteLine($"{":x:".Emoji()} {e.Message}");
                 return await Fail($"Run [chmod +x \"{acc_bin}\"] for resolve this problem.");
             }
+        }
+
+        private void Compile(string file, bool isTemp)
+        {
+            var directory = Directory.GetCurrentDirectory();
+            var acc_bin = Dirs.Bin.ACC.FullName;
+            var argBuilder = new List<string>();
+            var outputDir = "bin";
+
+            if (isTemp)
+                outputDir = "obj";
+            var Project = AncientProject.FromLocal();
+            var fileName = Path.GetFileNameWithoutExtension(file);
+            argBuilder.Add($"-o ./{outputDir}/{fileName}");
+            if (Project.Extension != null)
+                argBuilder.Add($"-e {Project.Extension}");
+            argBuilder.Add($"-s \"{file}\"");
+
+            var external = new ExternalTools(acc_bin, string.Join(" ", argBuilder));
+            Directory.CreateDirectory(Path.Combine(directory, outputDir));
+            external.Start().Wait().ExitCode();
+            
         }
     }
 }
