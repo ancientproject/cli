@@ -128,7 +128,7 @@
                 if (Dirs.CompilerFolder.EnumerateFiles().Any())
                     _ = Dirs.CompilerFolder.EnumerateFiles().Pipe(x => x.Delete()).ToArray();
 
-                var result = await Appx.By(AppxType.acc)
+                var result = await Appx.By(AppxType.vm)
                     .DownloadAsync();
                 Console.Write($"{":open_file_folder:".Emoji()} Extract files");
                 await RuneTask.Fire(() =>
