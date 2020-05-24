@@ -121,18 +121,18 @@
         {
             try
             {
-                if (Dirs.CompilerFolder.EnumerateFiles().Any())
+                if (Dirs.VMFolder.EnumerateFiles().Any())
                     Console.WriteLine($"Detected already installed vm, reinstall...".Color(Color.Orange));
 
 
-                if (Dirs.CompilerFolder.EnumerateFiles().Any())
+                if (Dirs.VMFolder.EnumerateFiles().Any())
                     _ = Dirs.CompilerFolder.EnumerateFiles().Pipe(x => x.Delete()).ToArray();
 
                 var result = await Appx.By(AppxType.vm)
                     .DownloadAsync();
                 Console.Write($"{":open_file_folder:".Emoji()} Extract files");
                 await RuneTask.Fire(() =>
-                    ZipFile.ExtractToDirectory(result.FullName, Dirs.CompilerFolder.FullName));
+                    ZipFile.ExtractToDirectory(result.FullName, Dirs.VMFolder.FullName));
             }
             catch (Exception e)
             {
